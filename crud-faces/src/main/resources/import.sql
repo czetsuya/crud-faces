@@ -82,6 +82,7 @@ CREATE SEQUENCE MEVEO_USER_SEQ start with 5 increment by 1;
 update MEVEO_ACCOUNT set principal_contact_id= (select id from meveo_user where username='manaty') where name_for_search='MANATY';
 update MEVEO_ACCOUNT set principal_contact_id= (select id from meveo_user where username='meveo') where name_for_search='MEVEO';
 
+DELETE FROM MEVEO_TITLE;
 INSERT INTO MEVEO_TITLE (id, code, is_company) VAlUES (1, 'M', false);
 INSERT INTO MEVEO_TITLE (id, code, is_company) VAlUES (2, 'MLLE', false);
 INSERT INTO MEVEO_TITLE (id, code, is_company) VAlUES (3, 'MME', false);
