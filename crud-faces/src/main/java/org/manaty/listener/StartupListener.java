@@ -17,12 +17,15 @@ package org.manaty.listener;
 
 import java.text.MessageFormat;
 import java.util.ResourceBundle;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.inject.Inject;
+
+import org.omnifaces.util.Messages;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author Edward P. Legaspi
@@ -31,8 +34,8 @@ import javax.inject.Inject;
 @Singleton
 @Startup
 public class StartupListener {
-	@Inject
-	private Logger log;
+
+	private Logger log = LoggerFactory.getLogger(StartupListener.class);
 
 	@Inject
 	private ResourceBundle resourceBundle;

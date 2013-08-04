@@ -6,7 +6,7 @@
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
 	xmlns:p="http://primefaces.org/ui"
-	template="/WEB-INF/templates/templateLogin.xhtml">
+	template="/WEB-INF/template/template.xhtml">
 
 	<ui:define name="body">
 
@@ -27,11 +27,6 @@
 				<div class="buttons-set">
 					<p:commandButton id="submit" value="#{messages['action.login']}"
 						action="#{identity.login}" ajax="false" />
-					<p:button outcome="/remindPassword.xhtml"
-						value="#{messages['action.remindPassword']}" />
-					<p:button outcome="/changePassword.xhtml"
-						value="#{messages['menu.changePassword']}"
-						rendered="#{meveoAuthenticator.expiredPasswordError}" />
 				</div>
 			</p:panel>
 		</h:form>
