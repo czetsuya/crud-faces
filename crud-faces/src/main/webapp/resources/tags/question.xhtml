@@ -1,0 +1,33 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:cf="http://java.sun.com/jsf/composite/tags"
+	xmlns:cc="http://java.sun.com/jsf/composite">
+
+<cc:interface>
+	<cc:attribute name="backingBean" required="true" />
+	<cc:attribute name="questions" required="true" />
+</cc:interface>
+
+<cc:implementation>
+
+	<ui:repeat value="#{cc.attrs.questions}" var="q">
+		<p:panelGrid columns="2" style="margin-left : #{5+(q.question.depth*20)}px;">
+			<h:outputLabel value="#{q.question.question}"></h:outputLabel>
+			<p:selectBooleanButton onLabel="#{messages['commons.yes']}"
+				offLabel="#{messages['commons.no']}" onIcon="ui-icon-check"
+				offIcon="ui-icon-close" value="#{q.ok}">
+				<p:ajax update="@all" listener="#{cc.attrs.backingBean.onSelect(q)}"></p:ajax>
+			</p:selectBooleanButton>
+		</p:panelGrid>
+	</ui:repeat>
+
+</cc:implementation>
+
+</html>

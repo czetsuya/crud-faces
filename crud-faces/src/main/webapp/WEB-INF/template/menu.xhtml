@@ -1,0 +1,19 @@
+<h:form id="menu" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+	<p:menubar>
+
+		<p:submenu id="serviceProviderAdministration"
+			label="#{messages['menu.serviceProviderAdministration']}"
+			rendered="#{identity.hasPermission('user','manage') or identity.hasPermission('businessAccount','manage')}">
+			<p:menuitem id="serviceProviderUsers"
+				value="#{messages['menu.users']}"
+				outcome="/administration/user/users.xhtml?accountTypeFilter=serviceProvider&amp;faces-redirect=true"
+				rendered="#{identity.hasPermission('user','manage')}" />
+		</p:submenu>
+
+	</p:menubar>
+</h:form>

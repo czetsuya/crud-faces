@@ -1,0 +1,62 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:cf="http://java.sun.com/jsf/composite/tags"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:cc="http://java.sun.com/jsf/composite">
+
+<cc:interface componentType="formPanel">
+	<cc:attribute name="backingBean" required="true" />
+	<cc:attribute name="edit" default="#{cc.attrs.backingBean.edit}" />
+	<cc:attribute name="formId" default="formId" />
+	<cc:attribute name="_formTitle" default="" />
+	<cc:attribute name="columns" default="2" />
+	<cc:attribute name="showFormButtons" default="true" />
+	<cc:attribute name="ajaxSubmit" default="false" />
+	<cc:attribute name="killConversationOnSave" default="false" />
+	<cc:attribute name="killConversationOnBack" default="false" />
+	<cc:attribute name="useCustomIdParam" default="false" />
+</cc:interface>
+
+<cc:implementation>
+
+	<h:form id="#{cc.attrs.formId}">
+		<p:panel styleClass="form-panel">
+			<f:facet name="header">
+				<c:if test="#{empty cc.attrs._formTitle}">
+					<h:outputText value="#{cc.formTitle}" />
+				</c:if>
+				<c:if test="#{not empty cc.attrs._formTitle}">
+					<h:outputText value="#{cc.attrs._formTitle}" />
+				</c:if>
+			</f:facet>
+
+			<p:messages id="formMessages" showDetail="true" showSummary="false"
+				redisplay="false" />
+
+			<p:panelGrid columns="#{cc.attrs.columns}"
+				styleClass="form-panel-fields">
+				<cc:insertChildren />
+			</p:panelGrid>
+
+			<cf:formButtons rendered="#{cc.attrs.showFormButtons}"
+				backingBean="#{cc.attrs.backingBean}" edit="#{cc.attrs.edit}"
+				ajaxSubmit="#{cc.attrs.ajaxSubmit}"
+				killConversationOnSave="#{cc.attrs.killConversationOnSave}"
+				killConversationOnBack="#{cc.attrs.killConversationOnBack}"
+				useCustomIdParam="#{cc.attrs.useCustomIdParam}" />
+
+		</p:panel>
+
+		<h:inputSecret styleClass="no-display" id="conversationId"
+			value="#{cc.attrs.backingBean.conversationId}"></h:inputSecret>
+	</h:form>
+
+</cc:implementation>
+
+</html>

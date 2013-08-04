@@ -1,0 +1,127 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:cftl="https://github.com/czetsuya/CRUDFaces"
+	xmlns:cf="http://java.sun.com/jsf/composite/tags"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/template/template.xhtml">
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="edit" value="#{userBean.edit}" />
+			<f:viewParam name="lcid" value="#{userBean.lcid}" />
+			<f:viewParam name="objectId" value="#{userBean.objectId}" />
+			<f:event type="preRenderView" listener="#{userBean.preRenderView}" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:define name="body">
+
+		<cf:formPanel id="userForm" backingBean="#{userBean}" columns="1"
+			showFormButtons="false">
+			<cf:formField field="username" />
+			<cf:formField field="email" stringConverter="false" />
+
+			<p:panelGrid columns="2">
+				<p:outputLabel for="newPassword"
+					value="#{messages['entity.user.password']}"
+					rendered="#{userBean.showPasswordField}"></p:outputLabel>
+				<p:password id="newPassword" required="true"
+					match="newPasswordConfirmation" maxlength="50"
+					value="#{userBean.entity.newPassword}"
+					rendered="#{userBean.showPasswordField}"
+					validatorMessage="#{messages['message.error.unequalPasswordReg']}"></p:password>
+			</p:panelGrid>
+			<p:panelGrid columns="2">
+				<p:outputLabel for="newPasswordConfirmation"
+					value="#{messages['entity.user.passwordConfirm']}"
+					rendered="#{userBean.showPasswordField}"></p:outputLabel>
+				<p:password id="newPasswordConfirmation" required="true"
+					maxlength="50" value="#{userBean.entity.newPasswordConfirmation}"
+					rendered="#{userBean.showPasswordField}"></p:password>
+			</p:panelGrid>
+
+			<cf:formEntityField field="name" childField="title"
+				listBean="#{titlesAction}" isMessage="true" />
+			<cf:formField field="name" childField="firstName" />
+			<cf:formField field="name" childField="lastName" />
+			<cf:formEntityField field="businessAccount" childField="code"
+				listElements="#{businessAccountsAction.getAccounts(usersAction.accountTypeFilter)}" />
+			<cf:formField field="contact" childField="phone" />
+			<cf:formField field="roles" childField="name"></cf:formField>
+
+			<cf:formButtons backingBean="#{userBean}" edit="#{userBean.edit}"
+				ajaxSubmit="false" killConversationOnSave="false">
+				<p:commandButton value="#{messages['action.changePassword']}"
+					rendered="#{userBean.edit and (userBean.showPasswordField!=true)}"
+					onclick="changePasswordWidget.show()" type="button" />
+			</cf:formButtons>
+
+		</cf:formPanel>
+
+		<p:dialog widgetVar="changePasswordWidget"
+			header="#{messages['menu.changePassword']}" width="400px"
+			modal="true">
+
+			<h:form id="dialogForm">
+				<p:panel styleClass="form-panel">
+
+					<p:messages id="dialogMessages" showDetail="true"
+						showSummary="false" />
+
+					<p:panelGrid columns="1" styleClass="form-panel-fields">
+						<p:panelGrid columns="2" rendered="#{userBean.isUserAdmin() eq false}">
+							<p:outputLabel for="currentPassword"
+								value="#{messages['entity.user.passwordCurrent']}"></p:outputLabel>
+							<p:password id="currentPassword" required="true" maxlength="50"
+								value="#{userBean.currentPassword}"></p:password>
+						</p:panelGrid>
+						<p:panelGrid columns="2">
+							<p:outputLabel for="newPassword"
+								value="#{messages['entity.user.password']}"></p:outputLabel>
+							<p:password id="newPassword" required="true"
+								match="newPasswordConfirmation" maxlength="50"
+								value="#{userBean.entity.newPassword}"></p:password>
+						</p:panelGrid>
+						<p:panelGrid columns="2">
+							<p:outputLabel for="newPasswordConfirmation"
+								value="#{messages['entity.user.passwordConfirm']}"></p:outputLabel>
+							<p:password id="newPasswordConfirmation" required="true"
+								maxlength="50"
+								value="#{userBean.entity.newPasswordConfirmation}"></p:password>
+						</p:panelGrid>
+					</p:panelGrid>
+
+					<p:panel styleClass="form-panel-actions">
+						<p:commandButton value="#{messages['action.save']}"
+							action="#{userBean.changePassword()}"
+							update="@form :userForm:formId:formMessages"
+							oncomplete="handleDialogSubmit(xhr, status, args)" />
+						<p:commandButton value="#{messages['action.reset']}"
+							update="dialogForm" process="@this">
+							<p:resetInput target="dialogForm" />
+						</p:commandButton>
+						<p:commandButton value="#{messages['action.cancel']}"
+							onclick="changePasswordWidget.hide()" type="button"></p:commandButton>
+					</p:panel>
+				</p:panel>
+			</h:form>
+		</p:dialog>
+
+		<script type="text/javascript">
+			function handleDialogSubmit(xhr, status, args) {
+				if (args.validationFailed) {
+					changePasswordWidget.show();
+				} else {
+					changePasswordWidget.hide();
+				}
+			}
+		</script>
+
+	</ui:define>
+
+</ui:composition>

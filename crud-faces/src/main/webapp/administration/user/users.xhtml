@@ -1,0 +1,60 @@
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+                      "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:sc="http://java.sun.com/jsf/composite/components/seamfaces"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:cftl="https://github.com/czetsuya/CRUDFaces"
+	xmlns:cf="http://java.sun.com/jsf/composite/tags"
+	template="/WEB-INF/template/template.xhtml">
+
+	<ui:define name="metadata">
+		<f:metadata>
+			<f:viewParam name="accountTypeFilter"
+				value="#{usersBean.accountTypeFilter}" />
+			<f:event type="preRenderView" listener="#{usersBean.preRenderView}" />
+		</f:metadata>
+	</ui:define>
+
+	<ui:param name="pageTitle" value="#{messages['users.page.title']}" />
+
+	<ui:define name="body">
+
+		<p:panel>
+			<f:facet name="header">#{messages['page.title.user']}</f:facet>
+
+			<!-- ===================================== SEARCH CRITERIA ZONE ================================= -->
+
+			<cf:searchPanel columns="3" backingBean="#{usersBean}">
+				<cf:searchField field="businessAccount" childField="code"
+					listElements="#{businessAccountsAction.getAccounts(usersBean.accountTypeFilter)}" />
+				<cf:searchField field="username" />
+				<cf:searchField field="name" childField="lastName" />
+			</cf:searchPanel>
+
+			<!-- ===================================== SEARCH USERS RESULTS ================================= -->
+
+			<cftl:dataList backingBean="#{usersBean}">
+				<cftl:column label="#{messages['entity.common.username']}"
+					field="username" />
+				<cftl:column label="#{messages['entity.user.lastName']}"
+					field="name" childField="lastName" />
+				<cftl:column label="#{messages['entity.user.firstName']}"
+					field="name" childField="firstName" />
+				<cftl:column label="#{messages['entity.common.email']}"
+					field="email" />
+				<cftl:column label="#{messages['entity.user.businessAccount']}"
+					field="businessAccount" childField="name" />
+				<cftl:column label="#{messages['entity.common.phone']}"
+					field="contact" childField="phone" />
+				<cftl:column label="#{messages['entity.common.disabled']}"
+					field="disabled" isMessage="true" width="10%" />
+
+				<cftl:actionsColumn />
+			</cftl:dataList>
+
+		</p:panel>
+	</ui:define>
+</ui:composition>

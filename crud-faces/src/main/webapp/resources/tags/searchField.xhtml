@@ -1,0 +1,169 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui" xmlns:o="http://omnifaces.org/ui"
+	xmlns:cf="http://java.sun.com/jsf/composite/tags"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:cc="http://java.sun.com/jsf/composite">
+
+<cc:interface componentType="searchField">
+	<cc:attribute name="field" required="true" />
+	<cc:attribute name="backingBean" required="false" />
+	<cc:attribute name="disabled" default="false" />
+	<cc:attribute name="rangeSearch" default="true" />
+	<cc:attribute name="time" default="false" />
+	<cc:attribute name="childField" required="false" />
+	<cc:attribute name="listBean" required="false" />
+	<cc:attribute name="listElements" required="false" />
+	<cc:attribute name="popup" default="false" />
+	<cc:attribute name="popupId" default="popup" />
+</cc:interface>
+
+<cc:implementation>
+	<ui:fragment
+		rendered="#{cc.setField(cc.attrs.field, cc.attrs.childField, true)}"></ui:fragment>
+
+	<!--  If the value binding is a text. -->
+	<ui:fragment rendered="#{cc.text}">
+		<p:panelGrid columns="2">
+			<p:outputLabel for="#{cc.attrs.field}_text" value="#{cc.fieldLabel}" />
+			<p:inputText id="#{cc.attrs.field}_text"
+				value="#{cc.filters[cc.searchFieldValue]}"
+				disabled="#{cc.attrs.disabled}" maxlength="#{cc.maxLength}" />
+		</p:panelGrid>
+	</ui:fragment>
+
+	<!--  If the value binding is a boolean, display a drop down with yes/no choices. -->
+	<ui:fragment rendered="#{cc.boolean}">
+		<p:panelGrid columns="2">
+			<p:outputLabel for="#{cc.attrs.field}_boolean"
+				value="#{cc.fieldLabel}" />
+			<p:selectOneMenu id="#{cc.attrs.field}_boolean"
+				value="#{cc.filters[cc.searchFieldValue]}"
+				converter="javax.faces.Boolean" disabled="#{cc.attrs.disabled}">
+				<f:selectItem itemValue="#{null}" itemLabel="" />
+				<f:selectItem itemValue="#{false}"
+					itemLabel="#{messages['commons.no']}" />
+				<f:selectItem itemValue="#{true}"
+					itemLabel="#{messages['commons.yes']}" />
+			</p:selectOneMenu>
+		</p:panelGrid>
+	</ui:fragment>
+
+	<!--  If the value binding is a date, display a p:calendar field. -->
+	<ui:fragment rendered="#{cc.date}">
+		<ui:fragment rendered="#{not cc.attrs.rangeSearch}">
+			<p:panelGrid columns="2">
+				<p:outputLabel for="#{cc.attrs.field}_date" value="#{cc.fieldLabel}" />
+				<p:calendar id="#{cc.attrs.field}_date"
+					value="#{cc.filters[cc.searchFieldValue]}"
+					pattern="#{cc.datePattern}" disabled="#{cc.attrs.disabled}"
+					showButtonPanel="true" navigator="true" showOn="button" />
+			</p:panelGrid>
+		</ui:fragment>
+		<ui:fragment rendered="#{cc.attrs.rangeSearch}">
+			<p:panelGrid columns="2">
+				<p:outputLabel for="fromRange_#{cc.attrs.field}_date"
+					value="#{cc.fieldLabel}" />
+				<p:panelGrid columns="4">
+					<h:outputText value="#{messages['commons.dateFrom']}"
+						style="padding-right:5px" />
+					<p:calendar id="fromRange_#{cc.attrs.field}_date"
+						value="#{cc.filters[cc.fromRangeSearchFilterName]}"
+						pattern="#{cc.datePattern}" disabled="#{cc.attrs.disabled}" />
+
+					<h:outputText value="#{messages['commons.dateTill']}"
+						style="padding:5px" />
+					<p:calendar id="toRange_#{cc.attrs.field}_date"
+						value="#{cc.filters[cc.toRangeSearchFilterName]}"
+						pattern="#{cc.datePattern}" disabled="#{cc.attrs.disabled}" />
+				</p:panelGrid>
+			</p:panelGrid>
+		</ui:fragment>
+	</ui:fragment>
+
+	<!--  If the value binding is an enum, display a drop down. -->
+	<ui:fragment rendered="#{cc.enum}">
+		<p:panelGrid columns="2">
+			<p:outputLabel for="#{cc.attrs.field}_enum" value="#{cc.fieldLabel}" />
+			<p:selectOneMenu id="#{cc.attrs.field}_enum"
+				value="#{cc.filters[cc.searchFieldValue]}"
+				disabled="#{cc.attrs.disabled}"
+				converter="omnifaces.GenericEnumConverter">
+				<f:selectItem itemLabel="" />
+				<f:selectItems value="#{cc.getEnumConstants(cc.attrs.field)}"
+					var="enumElement" itemValue="#{enumElement}"
+					itemLabel="#{messages[enumElement.label]}" />
+			</p:selectOneMenu>
+		</p:panelGrid>
+	</ui:fragment>
+
+	<!--  If the value binding is a number display number field. -->
+	<ui:fragment rendered="#{cc.integer}">
+		<cf:numberField converterId="javax.faces.Integer" />
+	</ui:fragment>
+	<ui:fragment rendered="#{cc.long}">
+		<cf:numberField converterId="javax.faces.Long" />
+	</ui:fragment>
+	<ui:fragment rendered="#{cc.byte}">
+		<cf:numberField converterId="javax.faces.Byte" />
+	</ui:fragment>
+	<ui:fragment rendered="#{cc.short}">
+		<cf:numberField converterId="javax.faces.Short" />
+	</ui:fragment>
+	<ui:fragment rendered="#{cc.double}">
+		<cf:numberField converterId="javax.faces.Double" />
+	</ui:fragment>
+	<ui:fragment rendered="#{cc.float}">
+		<cf:numberField converterId="javax.faces.Float" />
+	</ui:fragment>
+	<ui:fragment rendered="#{cc.bigDecimal}">
+		<cf:numberField converterId="javax.faces.BigDecimal" />
+	</ui:fragment>
+
+	<ui:fragment rendered="#{cc.entityField}">
+		<!-- Search with entity popup -->
+		<ui:fragment rendered="#{cc.attrs.popup}">
+			<p:panelGrid columns="2">
+				<p:outputLabel for="#{cc.attrs.field}_child"
+					value="#{cc.fieldLabel}" />
+				<p:panelGrid id="#{cc.attrs.field}" columns="3">
+					<p:inputText id="#{cc.attrs.field}_child"
+						value="#{cc.filters[cc.searchFieldValue][cc.attrs.childField]}"
+						required="#{cc.required}" disabled="true" />
+					<p:commandButton id="selectLink"
+						onclick="dlg_#{cc.attrs.popupId}.show()" icon="ui-icon-search" />
+					<p:tooltip for="selectLink" value="#{messages['commons.search']}" />
+				</p:panelGrid>
+			</p:panelGrid>
+		</ui:fragment>
+
+		<!-- Search with entity list in select box -->
+		<ui:fragment
+			rendered="#{not cc.attrs.popup and not empty cc.attrs.listBean or not empty cc.attrs.listElements}">
+			<p:panelGrid columns="2">
+				<p:outputLabel for="_#{cc.attrs.id}_level" value="#{cc.fieldLabel}" />
+				<p:selectOneMenu id="_#{cc.attrs.id}_level"
+					value="#{cc.filters[cc.searchFieldValue]}"
+					converter="omnifaces.SelectItemsConverter">
+					<c:if test="#{cc.attrs.listElements==null}">
+						<c:set var="elements" value="#{cc.attrs.listBean.listAll()}" />
+					</c:if>
+					<c:if test="#{cc.attrs.listElements!=null}">
+						<c:set var="elements" value="#{cc.attrs.listElements}" />
+					</c:if>
+					<f:selectItem itemLabel="" itemValue="" />
+					<f:selectItems value="#{elements}" var="elem"
+						itemLabel="#{cc.getItemLabel(elem)}" itemValue="#{elem}" />
+				</p:selectOneMenu>
+			</p:panelGrid>
+		</ui:fragment>
+	</ui:fragment>
+
+</cc:implementation>
+
+</html>

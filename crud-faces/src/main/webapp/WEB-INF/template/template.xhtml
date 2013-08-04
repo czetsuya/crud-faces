@@ -1,0 +1,55 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<f:view xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui" contentType="text/html">
+
+	<ui:insert name="metadata" />
+
+	<html>
+
+<h:head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>CRUD Faces</title>
+	<meta name="author" content="czetsuya"></meta>
+	<h:outputStylesheet library="css" name="site.css" target="head"></h:outputStylesheet>
+	<ui:insert name="head" />
+</h:head>
+
+<h:body>
+
+	<div id="wrapper">
+		<div class="page">
+			<div class='before-content-notice'></div>
+			<div id="header-container">
+				<ui:include src="header.xhtml"></ui:include>
+			</div>
+			<div id="main-container" class="col1-layout">
+				<div class="main">
+					<div class="col-main">
+						<ui:insert name="body" />
+					</div>
+				</div>
+			</div>
+			<div id="footer-container">
+				<ui:include src="footer.xhtml"></ui:include>
+			</div>
+		</div>
+	</div>
+
+	<p:ajaxStatus
+		style="width:64px;height:64px;position:fixed;right:5px;bottom:5px">
+		<f:facet name="start">
+			<h:graphicImage library="img" name="loading.gif" />
+		</f:facet>
+
+		<f:facet name="complete">
+			<h:outputText value="" />
+		</f:facet>
+	</p:ajaxStatus>
+
+</h:body>
+	</html>
+</f:view>

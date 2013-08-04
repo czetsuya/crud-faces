@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:c="http://java.sun.com/jsp/jstl/core">
+
+	<div class="header">
+		<h:form>
+			<div class="left">				
+				JavaEE6
+				<br />CRUD Faces V 0.0.1-SNAPSHOT
+				<br />Primefaces 4.0-SNAPSHOT
+				<br />Omnifaces 1.5
+			</div>
+			<p:panel styleClass="right" rendered="#{not identity.loggedIn}">
+				<ul class="links">
+					<li><a
+						href="${facesContext.externalContext.requestContextPath}/login.jsf">#{messages['action.login']}</a></li>
+				</ul>
+			</p:panel>
+			<p:panel styleClass="right" rendered="#{identity.loggedIn}">
+				<ul class="links">
+					<li><a
+						href="${facesContext.externalContext.requestContextPath}/">#{messages['menu.home']}</a></li>
+					<li>|</li>
+					<li><a
+						href="${facesContext.externalContext.requestContextPath}/changePassword.jsf">#{messages['menu.changePassword']}</a></li>
+					<li>|</li>
+					<li><p:commandLink action="#{identity.logout}"
+							value="#{messages['menu.logout']}"></p:commandLink></li>
+				</ul>
+			</p:panel>
+		</h:form>
+		<div class="clear"></div>
+	</div>
+
+	<c:if test="#{identity.loggedIn}">
+		<div class="menu">
+			<ui:include src="menu.xhtml"></ui:include>
+		</div>
+	</c:if>
+
+</ui:composition>

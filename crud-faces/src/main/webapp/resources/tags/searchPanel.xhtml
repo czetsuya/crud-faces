@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" 
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:cf="http://java.sun.com/jsf/composite/tags"
+	xmlns:cc="http://java.sun.com/jsf/composite">
+
+<cc:interface componentType="searchFormPanelCC">
+	<cc:attribute name="backingBean" required="true" />
+
+	<cc:attribute name="columns" default="2" />
+
+	<cc:attribute name="showSearchButtons" default="true" />
+	<cc:attribute name="renderNewButton" type="java.lang.Boolean"
+		default="true" />
+	<cc:attribute name="newButtonView"
+		default="#{cc.attrs.backingBean.getNewViewName()}" />
+
+	<cc:attribute name="ajax" default="true" />
+	<cc:attribute name="ajaxUpdateIds" required="false"
+		default=":#{p:component('results_form')}" />
+</cc:interface>
+
+<cc:implementation>
+	<h:form id="searchForm">
+		<p:panel styleClass="search-panel">
+			<f:facet name="header">
+				<h:outputText value="#{cc.searchTitle}" />
+			</f:facet>
+
+			<p:messages />
+			<p:panelGrid columns="#{cc.attrs.columns}"
+				styleClass="search-panel-fields">
+				<cc:insertChildren />
+			</p:panelGrid>
+
+			<p:panel styleClass="buttons-set" style="padding: 0px;" rendered="#{cc.attrs.showSearchButtons}">
+				<p:commandButton id="buttonSearch"
+					value="#{messages['action.search']}" ajax="#{cc.attrs.ajax}"
+					action="#{cc.attrs.backingBean.search}"
+					update="#{cc.attrs.ajaxUpdateIds}" icon="ui-icon-search" />
+				<cf:clearButton backingBean="#{cc.attrs.backingBean}"
+					label="#{messages['action.clear']}"
+					resetAction="#{cc.attrs.backingBean.clean}" />
+				<p:button id="buttonNew" value="#{messages['action.new']}"
+					icon="ui-icon-plus" outcome="#{cc.attrs.newButtonView}"
+					rendered="#{cc.attrs.renderNewButton}">
+					<f:param name="lcid" value="#{cc.attrs.backingBean.conversationId}" />
+					<f:param name="edit" value="true" />
+				</p:button>
+			</p:panel>
+		</p:panel>
+	</h:form>
+</cc:implementation>
+
+</html>

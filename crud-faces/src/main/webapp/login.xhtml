@@ -1,0 +1,39 @@
+
+<!DOCTYPE composition PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	template="/WEB-INF/templates/templateLogin.xhtml">
+
+	<ui:define name="body">
+
+		<h:form id="loginForm">
+			<p:panel styleClass="login-panel" id="loginPanel"
+				rendered="#{!identity.loggedIn}">
+				<f:facet name="header">#{messages['action.login']}</f:facet>
+				<p:messages id="messages" globalOnly="true" styleClass="message"
+					errorClass="errormsg" infoClass="infomsg" warnClass="warnmsg" />
+				<div>
+					<p:panelGrid columns="2" rowClasses="prop">
+						<p:outputLabel for="username">#{messages['entity.common.username']}</p:outputLabel>
+						<p:inputText id="username" value="#{credentials.username}" />
+						<p:outputLabel for="password">#{messages['entity.user.password']}</p:outputLabel>
+						<p:password id="password" value="#{credentials.password}" />
+					</p:panelGrid>
+				</div>
+				<div class="buttons-set">
+					<p:commandButton id="submit" value="#{messages['action.login']}"
+						action="#{identity.login}" ajax="false" />
+					<p:button outcome="/remindPassword.xhtml"
+						value="#{messages['action.remindPassword']}" />
+					<p:button outcome="/changePassword.xhtml"
+						value="#{messages['menu.changePassword']}"
+						rendered="#{meveoAuthenticator.expiredPasswordError}" />
+				</div>
+			</p:panel>
+		</h:form>
+	</ui:define>
+</ui:composition>

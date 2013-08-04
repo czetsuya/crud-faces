@@ -1,0 +1,410 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:c="http://java.sun.com/jsp/jstl/core"
+	xmlns:o="http://omnifaces.org/ui"
+	xmlns:of="http://omnifaces.org/functions"
+	xmlns:cc="http://java.sun.com/jsf/composite">
+
+<cc:interface componentType="formField">
+
+	<cc:attribute name="field" required="true" />
+	<cc:attribute name="backingBean" required="false" />
+	<cc:attribute name="showButtonAddNew" default="true" />
+	<cc:attribute name="disabled" default="false" />
+	<cc:attribute name="showOnlyOnNew" default="false" />
+	<cc:attribute name="showOnlyOnConsult" default="false" />
+	<cc:attribute name="show"
+		default="#{((not cc.attrs.showOnlyOnNew) or (cc.attrs.showOnlyOnNew and cc.attrs.edit and cc.entityFromBackingBeanOrAttribute.id==null)) or ((not cc.attrs.showOnlyOnConsult) or (cc.attrs.showOnlyOnConsult and cc.attrs.edit== false))}" />
+	<cc:attribute name="edit"
+		default="#{cc.backingBeanFromParentOrCurrent.edit}" />
+	<cc:attribute name="size" default="20" />
+	<cc:attribute name="isMessage" default="false" />
+	<cc:attribute name="isRequired" default="false" />
+
+	<!-- html -->
+	<cc:attribute name="isHtml" default="false" />
+	<cc:attribute name="cols" default="20" />
+	<cc:attribute name="rows" default="5" />
+
+	<!-- converters and validators -->
+	<cc:attribute name="stringConverter" default="true" />
+	<cc:attribute name="converterId" default="" />
+	<cc:attribute name="validatorId" default="" />
+
+	<cc:attribute name="validateUnique" default="false" />
+	<cc:attribute name="validateRib" default="false" />
+	<cc:attribute name="validateEmail" default="false" />
+
+	<cc:attribute name="dualListModel" />
+	<cc:attribute name="dualListSource"
+		default="#{cc.backingBeanFromParentOrCurrent.getDualListSource()}"
+		type="java.util.List" />
+	<cc:attribute name="listType" default="simpleList" />
+
+	<cc:attribute name="time" default="false" />
+	<cc:attribute name="datePattern"
+		default="#{cc.attrs.time?paramBean.getProperty('format.dateTime','yyyy/MM/dd hh:mm:ss'):paramBean.getProperty('format.date','yyyy/MM/dd')}" />
+
+</cc:interface>
+
+<cc:implementation>
+
+	<ui:fragment
+		rendered="#{cc.setField(cc.attrs.field, cc.attrs.childField, true, cc.attrs.isMessage)}"></ui:fragment>
+
+	<ui:fragment rendered="#{cc.attrs.show}">
+
+		<ui:fragment rendered="#{cc.mask}">
+
+			<p:panelGrid id="textPanelMask" columns="3" rendered="#{cc.text}">
+				<p:outputLabel for="#{cc.attrs.id}_text1" value="#{cc.fieldLabel}" />
+				<p:inputMask mask="#{cc.maskValue}" id="#{cc.attrs.id}_text1"
+					rendered="#{not cc.attrs.isHtml and not cc.attrs.textArea and cc.attrs.edit}"
+					value="#{cc.formFieldValue}" disabled="#{cc.attrs.disabled}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					size="#{cc.attrs.size}" maxlength="#{cc.maxLength}">
+
+					<c:if test="#{not empty cc.attrs.converterId}">
+						<f:converter converterId="#{cc.attrs.converterId}" />
+					</c:if>
+
+					<c:if test="#{not empty cc.attrs.validatorId}">
+						<f:validator validatorId="#{cc.attrs.validatorId}" />
+					</c:if>					
+
+					<o:validator for="#{cc.attrs.id}_text1"
+						validatorId="javax.faces.RegularExpression"
+						pattern="#{cc.regexPattern}" disabled="#{empty cc.regexPattern}"
+						message="#{messages['javax.faces.validator.RegexValidator.NOT_MATCHED']}" />
+
+				</p:inputMask>
+
+				<h:outputText rendered="#{not cc.attrs.edit}"
+					value="#{cc.formFieldValue}" styleClass="value" />
+
+				<cc:insertChildren />
+			</p:panelGrid>
+
+		</ui:fragment>
+
+		<ui:fragment rendered="#{not cc.mask}">
+
+			<p:panelGrid id="textPanel" columns="3" rendered="#{cc.text}">
+				<p:outputLabel for="#{cc.attrs.id}_text" value="#{cc.fieldLabel}" />
+				<p:inputText id="#{cc.attrs.id}_text"
+					rendered="#{not cc.attrs.isHtml and not cc.attrs.textArea and cc.attrs.edit}"
+					value="#{cc.formFieldValue}" disabled="#{cc.attrs.disabled}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					size="#{cc.attrs.size}" maxlength="#{cc.maxLength}">
+
+					<c:if test="#{cc.attrs.stringConverter}">
+						<f:converter converterId="stringConverter" />
+					</c:if>
+
+					<c:if test="#{not empty cc.attrs.converterId}">
+						<f:converter converterId="#{cc.attrs.converterId}" />
+					</c:if>
+
+					<c:if test="#{not empty cc.attrs.validatorId}">
+						<f:validator validatorId="#{cc.attrs.validatorId}" />
+					</c:if>
+
+					<o:validator for="#{cc.attrs.id}_text" validatorId="emailValidator"
+						disabled="#{not cc.email}"
+						message="#{messages['message.validation.invalidEmail']}" />
+
+					<o:validator for="#{cc.attrs.id}_text"
+						validatorId="javax.faces.RegularExpression"
+						pattern="#{cc.regexPattern}" disabled="#{empty cc.regexPattern}"
+						message="#{messages['javax.faces.validator.RegexValidator.NOT_MATCHED']}" />
+
+				</p:inputText>
+
+				<h:outputText rendered="#{not cc.attrs.edit}"
+					value="#{cc.formFieldValue}" styleClass="value" />
+
+				<cc:insertChildren />
+			</p:panelGrid>
+
+		</ui:fragment>
+
+		<!--  If the value binding is a number, display an input number spinner. -->
+		<p:panelGrid columns="2" rendered="#{cc.integer}">
+			<p:outputLabel for="#{cc.attrs.id}_int" value="#{cc.fieldLabel}" />
+			<c:if test="#{cc.maxValue != 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_int"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" max="#{cc.maxValue}"
+					maxlength="#{cc.maxLength}" />
+			</c:if>
+			<c:if test="#{cc.maxValue == 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_int"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" maxlength="#{cc.maxLength}" />
+			</c:if>
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value" />
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<p:panelGrid columns="2" rendered="#{cc.byte}">
+			<p:outputLabel for="#{cc.attrs.id}_byte" value="#{cc.fieldLabel}" />
+			<c:if test="#{cc.maxValue != 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_byte"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" max="#{cc.maxValue}"
+					maxlength="#{cc.maxlength}" />
+			</c:if>
+			<c:if test="#{cc.maxValue == 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_byte"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" maxlength="#{cc.maxlength}" />
+			</c:if>
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value" />
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<p:panelGrid columns="2" rendered="#{cc.long}">
+			<p:outputLabel for="#{cc.attrs.id}_long" value="#{cc.fieldLabel}" />
+			<c:if test="#{cc.maxValue != 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_long"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" max="#{cc.maxValue}"
+					maxlength="#{cc.maxlength}" />
+			</c:if>
+			<c:if test="#{cc.maxValue == 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_long"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" maxlength="#{cc.maxlength}" />
+			</c:if>
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value" />
+
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<p:panelGrid columns="2" rendered="#{cc.short}">
+			<p:outputLabel for="#{cc.attrs.id}_short" value="#{cc.fieldLabel}" />
+			<c:if test="#{cc.maxValue != 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_short"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" max="#{cc.maxValue}"
+					maxlength="#{cc.maxlength}" />
+			</c:if>
+			<c:if test="#{cc.maxValue == 0}">
+				<p:spinner rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_short"
+					disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+					required="#{cc.required or cc.attrs.isRequired}"
+					min="#{cc.minValue}" maxlength="#{cc.maxlength}" />
+			</c:if>
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value" />
+
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<!--  If the value binding is a rational number, display an input text field. -->
+		<p:panelGrid columns="2" rendered="#{cc.bigDecimal}">
+			<p:outputLabel for="#{cc.attrs.id}_bigDecimal"
+				value="#{cc.fieldLabel}" />
+			<p:inputText rendered="#{cc.attrs.edit}"
+				id="#{cc.attrs.id}_bigDecimal" disabled="#{cc.attrs.disabled}"
+				value="#{cc.formFieldValue}"
+				required="#{cc.required or cc.attrs.isRequired}" size="5"
+				maxlength="#{cc.maxLength}">
+
+				<c:if test="#{not empty cc.attrs.converter}">
+					<f:converter converterId="#{cc.attrs.converter}" />
+				</c:if>
+
+			</p:inputText>
+
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value">
+				<f:converter converterId="bigDecimal4DigitsConverter" />
+			</h:outputText>
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<p:panelGrid columns="2" rendered="#{cc.double}">
+			<p:outputLabel for="#{cc.attrs.id}_double" value="#{cc.fieldLabel}" />
+			<p:inputText rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_double"
+				disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+				required="#{cc.required or cc.attrs.isRequired}" size="5" />
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value" />
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<p:panelGrid columns="2" rendered="#{cc.float}">
+			<p:outputLabel for="#{cc.attrs.id}_float" value="#{cc.fieldLabel}" />
+			<p:inputText rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_float"
+				disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+				required="#{cc.required or cc.attrs.isRequired}" size="5"
+				maxlength="#{cc.maxlength}" />
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value" />
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<!--  If the value binding is a boolean, display a selectBooleanCheckbox field. -->
+		<p:panelGrid columns="2" rendered="#{cc.boolean}">
+			<p:outputLabel for="#{cc.attrs.id}_boolean" value="#{cc.fieldLabel}" />
+
+			<p:selectBooleanButton id="#{cc.attrs.id}_boolean"
+				rendered="#{cc.attrs.edit}" disabled="#{cc.attrs.disabled}"
+				value="#{cc.formFieldValue}"
+				required="#{cc.required or cc.attrs.isRequired}"
+				offLabel="#{messages['commons.no']}"
+				onLabel="#{messages['commons.yes']}">
+				<c:if test="#{not empty cc.attrs.listenerUpdate}">
+					<p:ajax update="#{cc.attrs.listenerUpdate}" />
+				</c:if>
+			</p:selectBooleanButton>
+
+			<ui:fragment rendered="#{not cc.attrs.edit and cc.attrs.isMessage}">
+				<c:set var="fieldValue" value="#{cc.formFieldValue}" />
+				<h:outputText
+					rendered="#{fieldValue != null and fieldValue.toString() == 'true' and not cc.attrs.edit}"
+					value="#{messages['commons.yes']}" styleClass="field-value" />
+				<h:outputText
+					rendered="#{fieldValue != null and fieldValue.toString() == 'false' and not cc.attrs.edit}"
+					value="#{messages['commons.no']}" styleClass="value" />
+				<!-- 				toString was some workaround - todo: maybe works without toString  -->
+				<h:outputText
+					rendered="#{fieldValue != null and fieldValue.toString() != 'true' and fieldValue.toString() != 'false' and not cc.attrs.edit}"
+					value="#{messages[cc.entityFromBackingBeanOrAttribute[cc.fieldValue]]}"
+					styleClass="value" />
+			</ui:fragment>
+
+			<h:outputText
+				rendered="#{not cc.attrs.edit and not cc.attrs.isMessage}"
+				value="#{cc.formFieldValue}" styleClass="value" />
+
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<!-- 		 If the value binding is a date, display a p:calendar field. -->
+		<p:panelGrid columns="2" rendered="#{cc.date}">
+			<p:outputLabel for="#{cc.attrs.id}_date" value="#{cc.fieldLabel}" />
+			<p:calendar id="#{cc.attrs.id}_date" rendered="#{cc.attrs.edit}"
+				value="#{cc.formFieldValue}" disabled="#{cc.attrs.disabled}"
+				pattern="#{cc.attrs.datePattern}"
+				required="#{cc.required or cc.attrs.isRequired}"
+				showButtonPanel="true" navigator="true" showOn="button" />
+			<h:outputText rendered="#{not cc.attrs.edit}"
+				value="#{cc.formFieldValue}" styleClass="value">
+				<f:convertDateTime type="date" pattern="#{cc.attrs.datePattern}" />
+			</h:outputText>
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<!--  If the value binding is an enum, display a drop down. -->
+		<p:panelGrid columns="2" rendered="#{cc.enum}">
+			<p:outputLabel for="#{cc.attrs.id}_enum" value="#{cc.fieldLabel}" />
+			<p:selectOneMenu rendered="#{cc.attrs.edit}" id="#{cc.attrs.id}_enum"
+				disabled="#{cc.attrs.disabled}" value="#{cc.formFieldValue}"
+				required="#{cc.required or cc.attrs.isRequired}">
+				<f:selectItem itemLabel="" itemValue="" />
+				<f:selectItems value="#{cc.getEnumConstants(cc.attrs.field)}"
+					var="enumElement" itemLabel="#{messages[enumElement]}" />
+				<c:if test="#{not empty cc.attrs.listenerUpdate}">
+					<p:ajax update="#{cc.attrs.listenerUpdate}" />
+				</c:if>
+			</p:selectOneMenu>
+			<h:outputText id="#{cc.attrs.id}_enumView"
+				rendered="#{not cc.attrs.edit}" value="#{cc.formFieldValue}"
+				styleClass="value" />
+			<cc:insertChildren />
+		</p:panelGrid>
+
+		<!-- Many to Many -->
+		<ui:fragment rendered="#{cc.manyToMany}">
+			<p:panelGrid columns="2" styleClass="pick-list">
+				<p:outputLabel for="#{cc.attrs.id}_picklist"
+					value="#{cc.fieldLabel}" />
+				<c:set var="elements"
+					value="#{cc.backingBeanFromParentOrCurrent.dualListModel}" />
+				<c:if test="#{!empty cc.attrs.dualListModel}">
+					<c:set var="elements" value="#{cc.attrs.dualListModel}" />
+				</c:if>
+				<p:pickList required="#{cc.required or cc.attrs.isRequired}"
+					id="#{cc.attrs.id}_picklist" value="#{elements}" var="elem"
+					itemLabel="#{cc.getItemLabel(elem)}" itemValue="#{elem}"
+					disabled="#{not cc.attrs.edit}">
+					<o:converter converterId="omnifaces.ListConverter"
+						list="#{cc.backingBeanFromParentOrCurrent.dualListSource}" />
+				</p:pickList>
+			</p:panelGrid>
+		</ui:fragment>
+
+		<!--  If the value binding is a List, display a panel with list of entities. -->
+		<ui:fragment rendered="#{cc.listField and not cc.manyToMany}">
+
+			<ui:fragment rendered="#{cc.attrs.listType == 'simpleList'}">
+				<p:panelGrid columns="2">
+					<h:outputLabel value="#{cc.fieldLabel}" />
+					<p:panelGrid>
+						<p:dataTable id="#{cc.attrs.id}_datatable"
+							value="#{cc.formFieldValue}" var="listElement">
+							<c:forEach items="#{cc.attrs.showFields.split(';')}"
+								var="fieldToShow">
+								<c:set var="headerAndValue" value="#{fieldToShow.split(',')}" />
+								<c:set var="style" value="text-align:left;" />
+								<c:if test="#{'right'.equals(headerAndValue[2])}">
+									<c:set var="style" value="text-align:right;" />
+								</c:if>
+								<p:column width="100">
+									<f:facet name="header">
+										<h:outputText value="#{messages[headerAndValue[0]]}" />
+									</f:facet>
+									<c:set var="value" value="#{listElement[headerAndValue[1]]}"></c:set>
+									<c:if test="#{'msg'.equals(headerAndValue[2])}">
+										<c:set var="value"
+											value="#{messages[listElement[headerAndValue[1]].label]}" />
+									</c:if>
+									<h:outputText style="text-align:right;" value="#{value}"
+										converter="#{getConverter.forType(listElement[headerAndValue[1]])}" />
+								</p:column>
+							</c:forEach>
+
+							<p:column rendered="#{cc.attrs.deleteButton and cc.attrs.edit}">
+								<p:tooltip for="deletelink"
+									value="#{messages['commons.delete']}" showEffect="slide"
+									hideEffect="slide" />
+								<h:commandLink id="deletelink"
+									action="#{cc.backingBeanFromParentOrCurrent.delete(listElement.id)}"
+									onclick="if(confirm('#{messages['commons.confirmDelete']}')){return true;}else{return false;}">
+									<h:graphicImage value="/img/delete.gif" style="border:0" />
+								</h:commandLink>
+							</p:column>
+						</p:dataTable>
+						<p:commandButton
+							rendered="#{cc.attrs.showButtonAddNew and cc.attrs.edit and cc.entityFromBackingBeanOrAttribute.getId() != null}"
+							value="#{messages['commons.addNew']}"
+							onclick="alert('not implemented. formField.xhtml line 248')" />
+						<cc:insertChildren />
+					</p:panelGrid>
+				</p:panelGrid>
+			</ui:fragment>
+
+		</ui:fragment>
+
+	</ui:fragment>
+
+</cc:implementation>
+</html>
